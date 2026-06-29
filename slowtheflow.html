@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Slow the Flow — Aryan Aggarwal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#F0FAF8;--ink:#FFFFFF;--panel:#E8F6F3;--panel2:#D4EEE9;
+  --border:rgba(26,140,125,.12);--border2:rgba(26,140,125,.25);
+  --water:#1A8C7D;--water2:#23B89E;--water3:#0F6B5E;--water-glow:rgba(26,140,125,.22);
+  --amber:#B36800;--red:#C0392B;
+  --text:#0A2520;--text2:#2D6B60;--text3:#5A9E8F;
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--deep);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:.9rem 3rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(240,250,248,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-mark{
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.08em;color:var(--water);
+}
+.nav-drop{
+  width:8px;height:8px;border-radius:50%;background:var(--water2);
+  box-shadow:0 0 10px var(--water2);animation:pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+.nav-links{display:flex;gap:2rem;align-items:center}
+.nav-links a{font-size:13px;color:var(--text2);letter-spacing:.02em;transition:color .2s;cursor:pointer}
+.nav-links a:hover{color:var(--water3)}
+.nav-cta{
+  background:var(--water);color:var(--text);
+  padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;
+  transition:all .2s;cursor:pointer;border:none;
+}
+.nav-cta:hover{background:var(--water2);box-shadow:0 0 20px var(--water-glow)}
+
+/* ── BG ── */
+.hero-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(160deg,#E8F8F5 0%,#C8EFEA 40%,#B0E8E0 100%)}
+.hero-bg-grid{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(26,140,125,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(26,140,125,.08) 1px,transparent 1px);
+  background-size:60px 60px}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:8px;padding:13px 28px;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;font-family:var(--sans)}
+.btn-primary{background:var(--water);color:var(--text)}
+.btn-primary:hover{background:var(--water2);box-shadow:0 0 24px var(--water-glow);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--water3);color:var(--water3)}
+.btn-ghost{background:rgba(26,140,125,.06);border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{background:rgba(26,140,125,.12)}
+.btn-sm{padding:9px 18px;font-size:13px}
+
+/* ── SECTIONS ── */
+.section{padding:7rem 3rem}
+.section-inner{max-width:1100px;margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--water2);margin-bottom:1rem}
+.eyebrow::before{content:'// ';opacity:.5}
+.section-h2{font-family:var(--serif);font-size:clamp(34px,4vw,54px);font-weight:400;color:var(--text);line-height:1.1;margin-bottom:1.25rem}
+.section-h2 em{font-style:italic;color:var(--water3)}
+.section-body{font-size:16px;color:var(--text2);line-height:1.8;font-weight:300;max-width:620px}
+.water-rule{height:1px;background:linear-gradient(to right,transparent,var(--water),transparent);opacity:.3}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* ═══════════════════════════════════
+   SCREEN 1 — HOMEPAGE
+═══════════════════════════════════ */
+
+/* HERO */
+.hero{min-height:100vh;padding:120px 3rem 80px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;max-width:1100px;margin:0 auto}
+.hero-tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--water2);margin-bottom:1.75rem;display:flex;align-items:center;gap:10px}
+.hero-tag::before{content:'//';opacity:.5}
+.hero-h1{font-family:var(--serif);font-size:clamp(52px,7vw,96px);font-weight:400;line-height:1;color:var(--text);margin-bottom:1rem;text-shadow:0 2px 20px rgba(26,140,125,.08)}
+.hero-h1 em{font-style:italic;color:var(--water3);display:block}
+.hero-sub{font-size:18px;color:var(--text2);max-width:520px;line-height:1.7;font-weight:300;margin-bottom:2.5rem}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4rem}
+.hero-countdown{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.5rem 2rem;display:inline-flex;align-items:center;gap:2rem;max-width:100%;flex-wrap:wrap}
+.countdown-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);white-space:nowrap}
+.countdown-units{display:flex;gap:1.5rem;flex-wrap:wrap}
+.cu{text-align:center}
+.cu-num{font-family:var(--mono);font-size:32px;font-weight:500;color:var(--text);line-height:1}
+.cu-lbl{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+
+/* FEATURES STRIP */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.feature{background:white;padding:2.5rem;transition:background .2s;cursor:pointer}
+.feature:hover{background:var(--panel)}
+.feature-icon{width:44px;height:44px;border-radius:8px;background:rgba(26,140,125,.12);border:1px solid rgba(26,140,125,.25);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1.25rem}
+.feature-title{font-size:17px;font-weight:500;color:var(--text);margin-bottom:.6rem}
+.feature-body{font-size:14px;color:var(--text2);line-height:1.7;font-weight:300}
+.feature-stat{display:inline-block;margin-top:1rem;font-family:var(--mono);font-size:12px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)}
+.feature-cta{margin-top:1.25rem;font-size:13px;color:var(--water3);display:flex;align-items:center;gap:6px}
+
+/* IMPACT NUMBERS */
+.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-top:3rem}
+.impact-item{background:white;padding:2.5rem 2rem;text-align:center}
+.impact-num{font-family:var(--serif);font-size:52px;font-weight:400;line-height:1;color:var(--water3)}
+.impact-label{font-size:13px;color:var(--text2);margin-top:.5rem;font-weight:300}
+.impact-sub{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:.25rem;letter-spacing:.04em}
+
+/* ORIGIN */
+.origin-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:5rem;align-items:center}
+.origin-map{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.9;background:white;}
+.origin-map-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--water2);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.origin-stat{display:flex;justify-content:space-between;padding:4px 0}
+.origin-stat-val{color:var(--text);font-weight:500}
+.origin-stat-val.red{color:var(--red)}
+.origin-stat-val.water{color:var(--water3)}
+.origin-quote{margin-top:1.5rem;padding:1.25rem;border-left:3px solid var(--water);background:rgba(26,140,125,.06);border-radius:0 6px 6px 0;border:1px solid rgba(26,140,125,.12)}
+.origin-quote-text{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--text);line-height:1.6;font-weight:500}
+.origin-quote-attr{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:.75rem}
+.origin-text p{font-size:16px;color:var(--text2);line-height:1.8;font-weight:300;margin-bottom:1.25rem}
+.origin-text strong{color:var(--text);font-weight:500}
+
+/* CREDS */
+.creds-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:3rem}
+.cred-group-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.cred-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.cred-item:last-child{border-bottom:none}
+.cred-dot{width:6px;height:6px;border-radius:50%;background:var(--water);margin-top:6px;flex-shrink:0}
+.cred-dot.gold{background:var(--amber)}
+.cred-text{font-size:14px;color:var(--text2);line-height:1.5}
+.cred-text strong{color:var(--text);font-weight:500;display:block;margin-bottom:2px}
+.cred-medal{font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:2px 8px;border-radius:10px;border:1px solid rgba(26,140,125,.2);margin-left:auto;flex-shrink:0;align-self:center;white-space:nowrap}
+.cred-medal.gold{color:var(--amber);background:rgba(232,160,50,.08);border-color:rgba(232,160,50,.2)}
+
+/* FOUNDER */
+.founder-grid{display:grid;grid-template-columns:300px 1fr;gap:5rem;align-items:start}
+.founder-card{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;position:sticky;top:90px;box-shadow:0 4px 24px rgba(26,140,125,.08)}
+.founder-card-header{padding:2.5rem;text-align:center;background:linear-gradient(160deg,rgba(26,140,125,.15),rgba(26,140,125,.04));border-bottom:1px solid var(--border)}
+.founder-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--water),var(--water2));display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:28px;color:var(--deep);margin:0 auto 1rem}
+.founder-name{font-family:var(--serif);font-size:22px;color:var(--text)}
+.founder-title{font-size:12px;color:var(--water2);margin-top:4px;font-weight:300;letter-spacing:.03em}
+.founder-card-body{padding:1.5rem}
+.founder-link-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text3);padding:6px 0;border-bottom:1px solid var(--border)}
+.founder-link-row:last-child{border-bottom:none}
+.founder-link-row a{color:var(--water2)}
+.founder-story p{font-size:16px;color:var(--text2);line-height:1.8;font-weight:300;margin-bottom:1.25rem}
+.founder-story strong{color:var(--text);font-weight:500}
+.pull-quote{margin:2rem 0;padding:1.5rem;border-left:3px solid var(--water);background:rgba(26,140,125,.06);border-radius:0 8px 8px 0;border:1px solid rgba(26,140,125,.12)}
+.pull-quote-text{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--text);line-height:1.5}
+
+/* TECH */
+.tech-card{background:white;border:1px solid var(--border);border-radius:10px;padding:2rem;font-family:var(--mono);font-size:13px;margin-top:2.5rem;box-shadow:0 2px 12px rgba(26,140,125,.06)}
+.tech-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.tech-row:last-child{border-bottom:none}
+.tech-key{color:var(--text3);font-size:12px}
+.tech-val{color:var(--water3)}
+.tech-val.green{color:#5DD678}
+
+/* FOOTER */
+footer{background:#0A2520;border-top:1px solid rgba(26,140,125,.2);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-left{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.4)}
+.footer-right{font-size:12px;color:rgba(255,255,255,.4)}
+
+/* ═══════════════════════════════════
+   CALCULATOR SCREENS
+═══════════════════════════════════ */
+.calc-screen{min-height:100vh;padding:100px 1.5rem 3rem;display:flex;flex-direction:column;align-items:center;background:var(--deep)}
+.calc-card{background:white;border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:640px;box-shadow:0 4px 32px rgba(26,140,125,.08)}
+.calc-header{text-align:center;margin-bottom:2.5rem}
+.calc-tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--water2);margin-bottom:.75rem}
+.calc-title{font-family:var(--serif);font-size:clamp(26px,4vw,38px);color:var(--text);line-height:1.2;margin-bottom:.5rem}
+.calc-sub{font-size:14px;color:var(--text2);font-weight:300;line-height:1.6}
+
+/* VIRTUAL WATER PAGE */
+.vw-product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2rem 0}
+.vw-product{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.5rem;text-align:center}
+.vw-product-emoji{font-size:32px;margin-bottom:.75rem}
+.vw-product-name{font-size:14px;color:var(--text2);margin-bottom:.5rem}
+.vw-product-num{font-family:var(--serif);font-size:28px;color:var(--water3);line-height:1}
+.vw-product-unit{font-size:11px;color:var(--text3);margin-top:3px}
+.vw-fact{background:rgba(26,140,125,.08);border:1px solid rgba(26,140,125,.2);border-radius:8px;padding:1rem 1.25rem;margin:1rem 0;font-size:14px;color:var(--text2);line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.vw-fact-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* CALCULATOR FORM */
+.calc-question{margin-bottom:2rem}
+.calc-q-label{font-size:15px;color:var(--text);font-weight:500;margin-bottom:1rem}
+.calc-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.calc-option{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:1.25rem;text-align:center;cursor:pointer;transition:all .2s;
+}
+.calc-option:hover{border-color:var(--water3);background:rgba(26,140,125,.08)}
+.calc-option.selected{border-color:var(--water);background:rgba(26,140,125,.15)}
+.calc-option-icon{font-size:28px;margin-bottom:.5rem}
+.calc-option-label{font-size:14px;color:var(--text2)}
+.calc-option.selected .calc-option-label{color:var(--water3)}
+.calc-number-input{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:16px;color:var(--text);outline:none;font-family:var(--sans);transition:border-color .2s}
+.calc-number-input:focus{border-color:var(--water)}
+.calc-hint{font-size:12px;color:var(--text3);margin-top:6px;font-family:var(--mono)}
+
+/* RESULTS */
+.result-total{text-align:center;background:linear-gradient(135deg,rgba(26,140,125,.15),rgba(26,140,125,.05));border:1px solid rgba(26,140,125,.25);border-radius:12px;padding:2rem;margin-bottom:1.5rem}
+.result-total-num{font-family:var(--serif);font-size:clamp(48px,8vw,80px);color:var(--water3);line-height:1}
+.result-total-unit{font-size:15px;color:var(--text2);margin-top:.5rem}
+.result-comparison{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:12px}
+.result-comp-icon{font-size:22px;flex-shrink:0}
+.result-comp-text{font-size:14px;color:var(--text2);line-height:1.5}
+.result-comp-text strong{color:var(--text)}
+
+/* RECOMMENDATIONS */
+.reco-hero{text-align:center;background:var(--water);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem;color:var(--deep)}
+.reco-hero-label{font-size:13px;font-weight:500;opacity:.8;margin-bottom:.25rem}
+.reco-hero-num{font-family:var(--serif);font-size:56px;line-height:1;font-weight:400}
+.reco-hero-unit{font-size:14px;opacity:.8}
+.reco-item{background:white;border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:.75rem;display:flex;gap:1rem;align-items:flex-start;cursor:pointer;transition:all .2s;box-shadow:0 1px 6px rgba(26,140,125,.05)}
+.reco-item:hover{border-color:var(--water3)}
+.reco-icon{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.reco-icon.blue{background:rgba(66,133,244,.15)}
+.reco-icon.green{background:rgba(74,222,128,.12)}
+.reco-icon.teal{background:rgba(26,140,125,.15)}
+.reco-text{flex:1}
+.reco-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:.25rem}
+.reco-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.reco-save{font-family:var(--mono);font-size:12px;color:var(--water2);background:rgba(26,140,125,.1);padding:3px 10px;border-radius:10px;margin-top:.5rem;display:inline-block}
+
+/* IMPACT / CONGRATS */
+.impact-congrats{text-align:center;margin-bottom:2rem}
+.impact-trophy{font-size:56px;margin-bottom:.75rem}
+.impact-big-title{font-family:var(--serif);font-size:36px;color:var(--text);margin-bottom:.25rem}
+.impact-big-sub{font-size:14px;color:var(--text2);font-weight:300}
+.impact-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem}
+.impact-stat-box{background:white;border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-align:center;box-shadow:0 1px 6px rgba(26,140,125,.05)}
+.impact-stat-box.primary{grid-column:1/-1;background:rgba(26,140,125,.1);border-color:rgba(26,140,125,.25)}
+.impact-stat-num{font-family:var(--serif);font-size:38px;color:var(--water3);line-height:1}
+.impact-stat-label{font-size:12px;color:var(--text2);margin-top:.25rem}
+.impact-stat-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)}
+.impact-banner{background:var(--water);border-radius:10px;padding:1.25rem;text-align:center;color:var(--deep);font-size:14px;font-weight:500;line-height:1.6;margin-bottom:1.5rem}
+.impact-footer-text{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1.25rem;font-size:13px;color:var(--text2);line-height:1.7}
+.impact-footer-text strong{color:var(--text)}
+.impact-share-row{display:flex;gap:10px;margin-top:1.5rem;flex-wrap:wrap}
+
+/* PROGRESS BAR */
+.calc-progress{display:flex;gap:6px;margin-bottom:2rem;justify-content:center}
+.calc-progress-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:background .3s}
+.calc-progress-dot.active{background:var(--water)}
+.calc-progress-dot.done{background:var(--water3)}
+
+/* BACK BUTTON */
+.back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;margin-bottom:2rem;transition:color .2s;background:none;border:none;font-family:var(--sans)}
+.back-btn:hover{color:var(--water3)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:.85rem 1.5rem}
+  .nav-links{display:none}
+  .section{padding:5rem 1.5rem}
+  .hero{padding:100px 1.5rem 60px}
+  .origin-grid,.founder-grid{grid-template-columns:1fr;gap:3rem}
+  .features-grid{grid-template-columns:1fr}
+  .impact-grid{grid-template-columns:repeat(2,1fr)}
+  .creds-grid{grid-template-columns:1fr}
+  .founder-card{position:static}
+  footer{flex-direction:column;text-align:center}
+  .hero-countdown{flex-direction:column;gap:1rem}
+  .vw-product-grid{grid-template-columns:1fr 1fr}
+  .calc-options{grid-template-columns:1fr 1fr}
+  .impact-stats-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .vw-product-grid{grid-template-columns:1fr}
+  .calc-options{grid-template-columns:1fr 1fr}
+  .impact-stats-grid{grid-template-columns:1fr}
+  .impact-stat-box.primary{grid-column:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .nav-drop{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hero-bg"></div>
+<div class="hero-bg-grid"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-mark" onclick="showScreen('home')">
+    <div class="nav-drop"></div>
+    slow the flow
+  </div>
+  <div class="nav-links">
+    <a onclick="showScreen('home');scrollTo(0,0)">Home</a>
+    <a onclick="showScreen('virtualwater')">Virtual Water</a>
+    <a onclick="showScreen('calculator')">Calculator</a>
+    <a onclick="showScreen('home');setTimeout(()=>document.getElementById('about-section').scrollIntoView({behavior:'smooth'}),100)">Founder</a>
+    <a onclick="showScreen('sources')" style="color:var(--water2)">Sources</a>
+    <button class="btn nav-cta btn-sm" onclick="showScreen('calculator')">Try the Calculator</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: HOME
+══════════════════════════════════════════ -->
+<div class="screen active" id="screen-home">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Save H₂O Initiative · Android · India</div>
+  <h1 class="hero-h1">The water crisis<br>is <em>invisible.</em><br>Until now.</h1>
+  <p class="hero-sub">Slow the Flow makes your hidden water footprint visible — and gives you the tools to shrink it before 2040 runs out.</p>
+  <div class="hero-actions">
+    <button class="btn btn-primary" onclick="showScreen('calculator')">Try the Calculator →</button>
+    <button class="btn btn-outline" onclick="showScreen('virtualwater')">What is Virtual Water?</button>
+  </div>
+
+  <!-- ANIMATED WATER DROPS SVG -->
+  <div style="margin-bottom:2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <div style="display:flex;gap:4px;align-items:flex-end">
+      <div class="drop-bar" style="animation-delay:0s"></div>
+      <div class="drop-bar" style="animation-delay:.15s"></div>
+      <div class="drop-bar" style="animation-delay:.3s"></div>
+      <div class="drop-bar" style="animation-delay:.45s"></div>
+      <div class="drop-bar" style="animation-delay:.6s"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.06em">
+      Every second, 1,000L of virtual water is invisibly consumed worldwide
+    </div>
+  </div>
+
+  <div class="hero-countdown" id="countdown">
+    <div class="countdown-label">Projected global water crisis countdown</div>
+    <div class="countdown-units">
+      <div class="cu"><div class="cu-num" id="cd-y">--</div><div class="cu-lbl">Years</div></div>
+      <div class="cu"><div class="cu-num" id="cd-mo">--</div><div class="cu-lbl">Months</div></div>
+      <div class="cu"><div class="cu-num" id="cd-d">--</div><div class="cu-lbl">Days</div></div>
+      <div class="cu"><div class="cu-num" id="cd-h">--</div><div class="cu-lbl">Hours</div></div>
+      <div class="cu"><div class="cu-num" id="cd-m">--</div><div class="cu-lbl">Min</div></div>
+      <div class="cu"><div class="cu-num" id="cd-s">--</div><div class="cu-lbl">Sec</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" style="background:#E8F6F3;border-top:1px solid var(--border);padding-top:4rem;padding-bottom:4rem">
+  <div class="section-inner">
+    <div class="features-grid reveal">
+      <div class="feature" onclick="showScreen('virtualwater')">
+        <div class="feature-icon">💧</div>
+        <div class="feature-title">Virtual Water</div>
+        <div class="feature-body">Learn about the hidden water footprint in everything we consume — from jeans to chocolate to cotton.</div>
+        <span class="feature-stat">Cotton: 10,000L/kg · Jeans: 7,200L</span>
+        <div class="feature-cta">Explore →</div>
+      </div>
+      <div class="feature" onclick="showScreen('calculator')">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Track Your Impact</div>
+        <div class="feature-body">Calculate your personal virtual water footprint in 60 seconds. See exactly how your habits add up.</div>
+        <span class="feature-stat">Average user: 128,000L/year</span>
+        <div class="feature-cta">Calculate now →</div>
+      </div>
+      <div class="feature" onclick="showScreen('calculator')">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Take Action</div>
+        <div class="feature-body">Get a personalised water-saving plan showing which habit change saves the most water for you specifically.</div>
+        <span class="feature-stat">Save up to 99,350L per year</span>
+        <div class="feature-cta">Start saving →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section class="section" style="background:#F0FAF8;border-top:1px solid var(--border);padding-top:4rem">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="eyebrow">Measured Impact</div>
+      <h2 class="section-h2">Water saved.<br><em>Time bought.</em></h2>
+    </div>
+    <div class="impact-grid reveal">
+      <div class="impact-item">
+        <div class="impact-num">99<span style="font-size:28px">K</span></div>
+        <div class="impact-label">Litres saved per user</div>
+        <div class="impact-sub">per year, max scenario</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-num">716</div>
+        <div class="impact-label">Days of global timeline extended</div>
+        <div class="impact-sub">if every user acts</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-num">3<span style="font-size:28px">+</span></div>
+        <div class="impact-label">Platforms built</div>
+        <div class="impact-sub">Android · Web · APK</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-num">1</div>
+        <div class="impact-label">Student founder</div>
+        <div class="impact-sub">Delhi, India · Age 16</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORIGIN STORY -->
+<section class="section" style="background:#FFF8F0;border-top:1px solid var(--border);padding-top:0">
+  <!-- ARAL SEA HERO IMAGE STRIP -->
+  <div style="background:#0A1A14;padding:3rem 3rem 2rem;text-align:center">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:.75rem">// NASA Earth Observatory · Aral Sea · 1960 → 2014</div>
+    <h2 style="font-family:var(--serif);font-size:clamp(28px,4vw,48px);color:white;font-weight:400;line-height:1.15;margin-bottom:.5rem">A lake the size of Ireland.<br><em style="color:#5DD6C0">Gone in 50 years.</em></h2>
+    <p style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:2rem;font-weight:300">Because of the cotton in your jeans.</p>
+    <!-- BEFORE / AFTER — Real NASA Aral Sea Images -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-width:820px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+
+      <!-- 1989 — LAKE FULL -->
+      <div style="position:relative;background:#0d2a40">
+        <div style="height:240px;position:relative;overflow:hidden;background:linear-gradient(135deg,#0e4a7a,#1a7aaa)">
+          <img
+            src="https://earthobservatory.nasa.gov/ContentWOC/images/aral/aral_tm_1989.jpg"
+            alt="Aral Sea 1989 — NASA Landsat satellite image showing the lake full and blue"
+            style="width:100%;height:240px;object-fit:cover;display:block;transition:opacity .3s"
+            onerror="this.style.display='none';document.getElementById('aral-1989-fallback').style.display='flex'">
+          <div id="aral-1989-fallback" style="display:none;width:100%;height:240px;position:absolute;inset:0;background:linear-gradient(160deg,#0e4a7a 0%,#1a8c7d 100%);flex-direction:column;align-items:center;justify-content:center;gap:12px">
+            <svg viewBox="0 0 120 80" style="width:120px" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="60" cy="45" rx="50" ry="30" fill="#1E90C0" opacity=".9"/>
+              <ellipse cx="60" cy="43" rx="40" ry="22" fill="#38AFDF" opacity=".7"/>
+              <path d="M20,50 C30,42 50,38 60,40 C70,42 90,38 100,45" stroke="rgba(255,255,255,.3)" stroke-width="2" fill="none"/>
+              <path d="M30,58 C45,52 65,50 80,55" stroke="rgba(255,255,255,.2)" stroke-width="1.5" fill="none"/>
+            </svg>
+            <span style="font-family:monospace;font-size:12px;color:rgba(255,255,255,.7)">1989 · Aral Sea Full</span>
+            <span style="font-family:monospace;font-size:10px;color:rgba(255,255,255,.4)">68,000 km²</span>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,.6);padding:.65rem 1rem;font-family:monospace;font-size:12px;color:white;display:flex;justify-content:space-between">
+          <span>🌊 1989 · Landsat · NASA</span><span style="color:#5DD6C0;font-weight:600">68,000 km²</span>
+        </div>
+      </div>
+
+      <!-- 2014 — LAKE GONE -->
+      <div style="position:relative;background:#1a0f05">
+        <div style="height:240px;position:relative;overflow:hidden;background:linear-gradient(135deg,#5a3010,#8B6020)">
+          <img
+            src="https://earthobservatory.nasa.gov/ContentWOC/images/aral/aral_oli_2014.jpg"
+            alt="Aral Sea 2014 — NASA OLI satellite image showing the lake almost completely dried up"
+            style="width:100%;height:240px;object-fit:cover;display:block;transition:opacity .3s"
+            onerror="this.style.display='none';document.getElementById('aral-2014-fallback').style.display='flex'">
+          <div id="aral-2014-fallback" style="display:none;width:100%;height:240px;position:absolute;inset:0;background:linear-gradient(160deg,#5a3010 0%,#8B6020 100%);flex-direction:column;align-items:center;justify-content:center;gap:12px">
+            <svg viewBox="0 0 120 80" style="width:120px" xmlns="http://www.w3.org/2000/svg">
+              <rect width="120" height="80" fill="#8B6014"/>
+              <path d="M10,25 L25,18 L35,28 L50,20 L65,30 L80,22 L95,32 L110,24" stroke="rgba(255,255,255,.12)" stroke-width="1" fill="none"/>
+              <path d="M15,42 L30,36 L45,44 L60,38 L75,46 L90,40 L105,48" stroke="rgba(255,255,255,.08)" stroke-width="1" fill="none"/>
+              <ellipse cx="88" cy="58" rx="14" ry="7" fill="#1a5070" opacity=".5"/>
+            </svg>
+            <span style="font-family:monospace;font-size:12px;color:rgba(255,255,255,.7)">2014 · Aral Sea Gone</span>
+            <span style="font-family:monospace;font-size:10px;color:#f87171">&lt;5% remains</span>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,.6);padding:.65rem 1rem;font-family:monospace;font-size:12px;color:white;display:flex;justify-content:space-between">
+          <span>🏜️ 2014 · OLI · NASA</span><span style="color:#f87171;font-weight:600">&lt;5% remains</span>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:.75rem;font-family:var(--mono)">
+      Images: NASA Earth Observatory · earthobservatory.nasa.gov/world-of-change/AralSea · Public Domain
+    </div>
+    <!-- STAT STRIP -->
+    <div style="display:flex;gap:0;margin-top:2rem;max-width:800px;margin-left:auto;margin-right:auto;border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px;padding:1rem;border-right:1px solid rgba(255,255,255,.08);text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:#5DD6C0;font-weight:500">68,000</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:3px">km² in 1960</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:1rem;border-right:1px solid rgba(255,255,255,.08);text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:#f87171;font-weight:500">~0</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:3px">km² by 2014</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:1rem;border-right:1px solid rgba(255,255,255,.08);text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:#fbbf24;font-weight:500">3.5M</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:3px">livelihoods lost</div>
+      </div>
+      <div style="flex:1;min-width:120px;padding:1rem;text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:#5DD6C0;font-weight:500">Cotton</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:3px">the only cause</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner" style="padding-top:4rem">
+    <div class="origin-grid">
+      <div class="reveal">
+        <div class="origin-map" style="background:white;border-color:rgba(26,140,125,.15)">
+          <div class="origin-map-title" style="color:var(--water)">// Aral Sea · Satellite Data Record</div>
+          <div class="origin-stat"><span>1960 — Surface area</span><span class="origin-stat-val" style="color:var(--text)">68,000 km²</span></div>
+          <div class="origin-stat"><span>1987 — After Soviet irrigation</span><span class="origin-stat-val red">27,000 km²</span></div>
+          <div class="origin-stat"><span>2007 — Lake classified</span><span class="origin-stat-val red">Largely gone</span></div>
+          <div class="origin-stat"><span>2014 — Eastern basin</span><span class="origin-stat-val red">Completely dry</span></div>
+          <div class="origin-stat"><span>Primary cause</span><span class="origin-stat-val" style="color:var(--text)">Virtual water export</span></div>
+          <div class="origin-stat"><span>UN classification</span><span class="origin-stat-val red">"Worst disaster"</span></div>
+          <div class="origin-stat"><span>Cotton water cost</span><span class="origin-stat-val" style="color:var(--water)">2,700L / garment</span></div>
+        </div>
+        <div class="origin-quote" style="margin-top:1.5rem;background:rgba(26,140,125,.06);border-left-color:var(--water)">
+          <div class="origin-quote-text" style="color:var(--text)">"One of the planet's worst environmental disasters."</div>
+          <div class="origin-quote-attr" style="color:var(--text3)">— UN Secretary General Ban Ki-moon, 2011</div>
+        </div>
+      </div>
+      <div class="origin-text reveal">
+        <div class="eyebrow">Why I Built This</div>
+        <h2 class="section-h2">A lake that<br><em>vanished</em> into cotton</h2>
+        <p>I was sixteen when I first saw a satellite image of the Aral Sea — the world's fourth-largest lake reduced to scattered desert puddles in a single generation. Not by drought. Not by climate change. By the t-shirts and jeans people like me buy without thinking.</p>
+        <p>The Soviet Union redirected the rivers that fed the sea to irrigate cotton fields. In forty years, a body of water the size of Ireland was gone. 3.5 million people lost their livelihoods. The mechanism was <strong>virtual water</strong> — the invisible volume of water embedded in every product we consume. This water doesn't appear on any price tag. It just disappears from somewhere else on Earth.</p>
+        <p>When I understood this, I couldn't unsee it. I opened Thunkable and started building.</p>
+        <div style="margin-top:2rem">
+          <button class="btn btn-primary" onclick="showScreen('virtualwater')">Learn About Virtual Water →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CREDENTIALS -->
+<section class="section" style="border-top:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="eyebrow">Academic Profile</div>
+      <h2 class="section-h2">The work behind<br><em>the work</em></h2>
+    </div>
+    <div class="creds-grid reveal">
+      <div class="cred-group">
+        <div class="cred-group-title">National Honours</div>
+        <div class="cred-item"><div class="cred-dot gold"></div><div class="cred-text"><strong>NSEJS — National Standard Examination in Junior Science</strong>State Topper & Centre Topper · Top 1% of Delhi · IAPT</div><div class="cred-medal gold">State Topper</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>MVPP — Mukhyamantri Vigyan Pratibha Pariksha</strong>Delhi State Rank 20 · Certificate of Merit & Cash Prize</div><div class="cred-medal">Rank 20</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>NSTSE — National Science Talent Search</strong>All India Rank 298 · Class Rank 3 · 81.67%</div><div class="cred-medal">AIR 298</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>IOQM — Indian Olympiad Qualifier in Mathematics</strong>Qualifier · Certificate of Merit Class 9 & 10</div><div class="cred-medal">Qualifier</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>Chess — FIDE Rating 1468</strong>Dr. Satyapaul Inter-School Certificate of Commendation</div><div class="cred-medal">1468 FIDE</div></div>
+      </div>
+      <div class="cred-group">
+        <div class="cred-group-title">International Olympiad Record</div>
+        <div class="cred-item"><div class="cred-dot gold"></div><div class="cred-text"><strong>WMI — World Mathematics Invitational, Taiwan</strong>Global Rank 3 · Silver Medalist</div><div class="cred-medal gold">Global #3</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>AMC-10 — American Mathematics Competition</strong>School Rank 1 · MAA</div><div class="cred-medal">School #1</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>SEAMO & SEAMO-X, Singapore</strong>Dual Bronze Medalist · Global Rank 13 · 75th Percentile</div><div class="cred-medal">Global #13</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>TIMO — Thailand International Mathematical Olympiad</strong>Silver Medalist · Heat Round score of 36</div><div class="cred-medal">Silver</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>HKIMO — Hong Kong International Mathematical Olympiad</strong>Silver Medalist · Heat Round score of 40</div><div class="cred-medal">Silver</div></div>
+        <div class="cred-item"><div class="cred-dot"></div><div class="cred-text"><strong>SASMO — Singapore and Asian Schools Maths Olympiad</strong>Silver Medalist · Global Rank 363</div><div class="cred-medal">Silver</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section class="section" style="border-top:1px solid var(--border)" id="about-section">
+  <div class="section-inner">
+    <div class="founder-grid">
+      <div class="reveal">
+        <div class="founder-card">
+          <div class="founder-card-header">
+            <div class="founder-avatar">A</div>
+            <div class="founder-name">Aryan Aggarwal</div>
+            <div class="founder-title">Student · Developer · Researcher<br>Delhi Public School, Rohini</div>
+          </div>
+          <div class="founder-card-body">
+            <div class="founder-link-row">📧 <a href="mailto:aryancoder1@gmail.com">aryancoder1@gmail.com</a></div>
+            <div class="founder-link-row">🐦 <a href="https://twitter.com/aryanwater" target="_blank">@aryanwater</a></div>
+            <div class="founder-link-row">📍 Delhi, India</div>
+            <div class="founder-link-row">🎓 Targeting CS · Class of 2027</div>
+          </div>
+        </div>
+      </div>
+      <div class="founder-story reveal">
+        <div class="eyebrow">About the Founder</div>
+        <h2 class="section-h2">I build things<br>that <em>matter</em></h2>
+        <div class="pull-quote"><div class="pull-quote-text">When I saw what cotton did to the Aral Sea, I didn't write an essay. I opened Thunkable and started building.</div></div>
+        <p>I'm Aryan Aggarwal — a student developer and competitive researcher from New Delhi who believes the most important problems are ones most people can't see.</p>
+        <p>My path to Slow the Flow runs through competitive mathematics. The chess board taught me to think several moves ahead. The olympiad circuit — where I've competed from Taiwan to Singapore to the US — trained me to work under constraint, to find the elegant solution when brute force fails. <strong>Global Rank 3 at WMI. State Topper in NSEJS. AMC-10 School Rank 1.</strong></p>
+        <p>Those aren't separate pursuits from Slow the Flow. They're the same muscle — structured thinking applied to hard problems. I built Slow the Flow alone, from research to APK, while preparing for national science examinations. It's live on the Play Store. It's won a competition. And it's still running.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section class="section" style="background:var(--panel);border-top:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="origin-grid reveal">
+      <div>
+        <div class="eyebrow">Engineering</div>
+        <h2 class="section-h2">Built to<br><em>ship.</em></h2>
+        <p class="section-body" style="margin-bottom:1.5rem">Not a school project — a production Android app live on the Google Play Store, built independently using visual and native development frameworks.</p>
+        <p class="section-body">Awarded <strong style="color:var(--text)">3rd Position at ROBOTRON Inter-School STEM Fest</strong> for mobile coding frameworks.</p>
+        <div style="margin-top:2rem;display:flex;gap:12px;flex-wrap:wrap">
+          <a href="https://play.google.com/store/apps/details?id=com.gmail.aryanchess2.slowtheflow" target="_blank" class="btn btn-primary btn-sm">▶ Google Play Store</a>
+          <button class="btn btn-ghost btn-sm" onclick="showScreen('calculator')">Try Calculator</button>
+        </div>
+      </div>
+      <div>
+        <div class="tech-card">
+          <div class="tech-row"><span class="tech-key">Developer Registry ID</span><span class="tech-val">com.gmail.aryanchess2.slowtheflow</span></div>
+          <div class="tech-row"><span class="tech-key">Build Framework</span><span class="tech-val">Thunkable (Native Visual Dev)</span></div>
+          <div class="tech-row"><span class="tech-key">Distribution</span><span class="tech-val green">Google Play Store ✓ Live</span></div>
+          <div class="tech-row"><span class="tech-key">Platform</span><span class="tech-val">Android + Web</span></div>
+          <div class="tech-row"><span class="tech-key">Award</span><span class="tech-val">ROBOTRON STEM Fest — 3rd Place</span></div>
+          <div class="tech-row"><span class="tech-key">Data Sources</span><span class="tech-val">UNICEF · CommonDreams · watercalculator.org</span></div>
+          <div class="tech-row"><span class="tech-key">Status</span><span class="tech-val green">Active ✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">// slowtheflow.in · Aryan Aggarwal · Delhi, India</div>
+  <div class="footer-right">Every drop counts. #SlowTheFlow #ExtendTheTime</div>
+</footer>
+
+</div><!-- end screen-home -->
+
+<!-- ══════════════════════════════════════════
+     SCREEN: VIRTUAL WATER
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-virtualwater">
+<div class="calc-screen">
+  <div style="width:100%;max-width:640px">
+    <button class="back-btn" onclick="showScreen('home')">← Back to Home</button>
+  </div>
+  <div class="calc-card">
+    <!-- ANIMATED SVG WATER WAVE -->
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <svg viewBox="0 0 640 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;height:80px">
+        <defs>
+          <linearGradient id="wg1" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#23B89E;stop-opacity:.8"/>
+            <stop offset="100%" style="stop-color:#1A8C7D;stop-opacity:.2"/>
+          </linearGradient>
+        </defs>
+        <path id="wave1" fill="url(#wg1)">
+          <animate attributeName="d" dur="4s" repeatCount="indefinite"
+            values="M0,40 C160,10 320,70 480,40 C560,25 600,45 640,40 L640,120 L0,120 Z;
+                    M0,50 C160,80 320,20 480,50 C560,65 600,35 640,50 L640,120 L0,120 Z;
+                    M0,40 C160,10 320,70 480,40 C560,25 600,45 640,40 L640,120 L0,120 Z"/>
+        </path>
+        <path id="wave2" fill="#23B89E" opacity="0.3">
+          <animate attributeName="d" dur="3s" repeatCount="indefinite"
+            values="M0,60 C120,30 280,80 440,55 C540,40 600,65 640,60 L640,120 L0,120 Z;
+                    M0,55 C120,75 280,35 440,60 C540,75 600,45 640,55 L640,120 L0,120 Z;
+                    M0,60 C120,30 280,80 440,55 C540,40 600,65 640,60 L640,120 L0,120 Z"/>
+        </path>
+        <!-- Water drop icons -->
+        <text x="60" y="38" font-size="18" opacity="0.6" style="animation:none">💧</text>
+        <text x="300" y="28" font-size="18" opacity="0.6">💧</text>
+        <text x="530" y="38" font-size="18" opacity="0.6">💧</text>
+      </svg>
+    </div>
+
+    <div class="calc-header">
+      <div class="calc-tag">Understanding Virtual Water</div>
+      <h2 class="calc-title">What is Virtual Water?</h2>
+      <p class="calc-sub">The hidden water footprint in everything we consume</p>
+    </div>
+
+    <div class="vw-fact">
+      <div class="vw-fact-icon">💡</div>
+      <div>Virtual water refers to the total amount of water used to produce goods and services. When you buy a product, you're indirectly consuming all the water that went into making it — from growing raw materials to manufacturing and transportation.</div>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:500;color:var(--text);margin:1.5rem 0 1rem">Virtual Water in Common Products</h3>
+    <div class="vw-product-grid">
+      <div class="vw-product">
+        <div class="vw-product-emoji">🍫</div>
+        <div class="vw-product-name">Chocolate</div>
+        <div class="vw-product-num">24,000L</div>
+        <div class="vw-product-unit">per kg</div>
+      </div>
+      <div class="vw-product">
+        <div class="vw-product-emoji">👕</div>
+        <div class="vw-product-name">Cotton Clothes</div>
+        <div class="vw-product-num">2,700L</div>
+        <div class="vw-product-unit">per piece</div>
+      </div>
+      <div class="vw-product">
+        <div class="vw-product-emoji">👖</div>
+        <div class="vw-product-name">Denim Jeans</div>
+        <div class="vw-product-num">7,200L</div>
+        <div class="vw-product-unit">per piece</div>
+      </div>
+      <div class="vw-product">
+        <div class="vw-product-emoji">🥩</div>
+        <div class="vw-product-name">Beef (1kg)</div>
+        <div class="vw-product-num">15,400L</div>
+        <div class="vw-product-unit">per kg</div>
+      </div>
+      <div class="vw-product">
+        <div class="vw-product-emoji">☕</div>
+        <div class="vw-product-name">Coffee (1 cup)</div>
+        <div class="vw-product-num">140L</div>
+        <div class="vw-product-unit">per cup</div>
+      </div>
+      <div class="vw-product">
+        <div class="vw-product-emoji">🍚</div>
+        <div class="vw-product-name">Rice (1kg)</div>
+        <div class="vw-product-num">3,400L</div>
+        <div class="vw-product-unit">per kg</div>
+      </div>
+    </div>
+
+    <div class="vw-fact" style="margin-top:1.5rem">
+      <div class="vw-fact-icon">⚠️</div>
+      <div>By 2040, if current consumption patterns continue, we may face severe water scarcity affecting billions of people worldwide. The Aral Sea — once the world's 4th largest lake — has already dried up largely because of virtual water export through cotton.</div>
+    </div>
+
+    <div class="vw-fact" style="background:rgba(232,160,50,.08);border-color:rgba(232,160,50,.25)">
+      <div class="vw-fact-icon">🔍</div>
+      <div><strong style="color:var(--amber)">Did you know?</strong> A leaky faucet that drips once per second wastes up to 10,000 litres of water per year. Always repair leaky taps immediately!</div>
+    </div>
+
+    <div style="margin-top:2rem;text-align:center">
+      <p style="font-size:15px;color:var(--text2);margin-bottom:1.25rem">Your Choices Matter — ready to find out your footprint?</p>
+      <button class="btn btn-primary" onclick="showScreen('calculator')" style="width:100%;justify-content:center">Calculate My Water Footprint →</button>
+    </div>
+  </div>
+</div>
+<footer><div class="footer-left">// slowtheflow.in</div><div class="footer-right">#SlowTheFlow</div></footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: CALCULATOR
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-calculator">
+<div class="calc-screen">
+  <div style="width:100%;max-width:640px">
+    <button class="back-btn" onclick="showScreen('home')">← Back to Home</button>
+  </div>
+  <div class="calc-card">
+    <div class="calc-progress">
+      <div class="calc-progress-dot active" id="dot-1"></div>
+      <div class="calc-progress-dot" id="dot-2"></div>
+      <div class="calc-progress-dot" id="dot-3"></div>
+      <div class="calc-progress-dot" id="dot-4"></div>
+    </div>
+
+    <div class="calc-header">
+      <div class="calc-tag">Water Footprint Calculator</div>
+      <h2 class="calc-title">Tell Us About<br>Your Habits</h2>
+      <p class="calc-sub">Answer a few questions to calculate your virtual water consumption</p>
+    </div>
+
+    <!-- Q1: Bathing -->
+    <div id="calc-q1">
+      <div class="calc-question">
+        <div class="calc-q-label">How do you take your bath?</div>
+        <div class="calc-options">
+          <div class="calc-option" id="opt-shower" onclick="selectBath('shower')">
+            <div class="calc-option-icon">🚿</div>
+            <div class="calc-option-label">Shower</div>
+          </div>
+          <div class="calc-option" id="opt-bucket" onclick="selectBath('bucket')">
+            <div class="calc-option-icon">🪣</div>
+            <div class="calc-option-label">Bucket</div>
+          </div>
+        </div>
+      </div>
+      <div class="calc-question">
+        <div class="calc-q-label">How many cotton clothes do you buy in a year?</div>
+        <input type="number" class="calc-number-input" id="inp-cotton" placeholder="Enter number" min="0" max="200">
+        <div class="calc-hint">// e.g. t-shirts, shirts, kurtas</div>
+      </div>
+      <button class="btn btn-primary" onclick="goQ2()" style="width:100%;justify-content:center">Next →</button>
+    </div>
+
+    <!-- Q2 -->
+    <div id="calc-q2" style="display:none">
+      <div class="calc-question">
+        <div class="calc-q-label">How many denim clothes (jeans, jackets, etc.) do you buy in a year?</div>
+        <input type="number" class="calc-number-input" id="inp-denim" placeholder="Enter number" min="0" max="100">
+        <div class="calc-hint">// jeans, denim jackets, shorts</div>
+      </div>
+      <div class="calc-question">
+        <div class="calc-q-label">How many chocolate bars do you buy in a year?</div>
+        <input type="number" class="calc-number-input" id="inp-choco" placeholder="Enter number" min="0" max="500">
+        <div class="calc-hint">// bars, slabs, chocolate packs</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="goQ1()" style="flex:1;justify-content:center">← Back</button>
+        <button class="btn btn-primary" onclick="goQ3()" style="flex:2;justify-content:center">Next →</button>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div id="calc-q3" style="display:none">
+      <div class="calc-question">
+        <div class="calc-q-label">How many cups of coffee do you drink per week?</div>
+        <input type="number" class="calc-number-input" id="inp-coffee" placeholder="Enter number" min="0" max="100">
+        <div class="calc-hint">// tea counts too — roughly similar</div>
+      </div>
+      <div class="calc-question">
+        <div class="calc-q-label">How many times do you eat beef or mutton per week?</div>
+        <input type="number" class="calc-number-input" id="inp-meat" placeholder="Enter number" min="0" max="21">
+        <div class="calc-hint">// servings per week</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="goQ2()" style="flex:1;justify-content:center">← Back</button>
+        <button class="btn btn-primary" onclick="goQ4()" style="flex:2;justify-content:center">Next →</button>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div id="calc-q4" style="display:none">
+      <div class="calc-question">
+        <div class="calc-q-label">How many kg of rice does your household consume per month?</div>
+        <input type="number" class="calc-number-input" id="inp-rice" placeholder="Enter kg" min="0" max="200">
+        <div class="calc-hint">// estimate for your whole family, divided by members</div>
+      </div>
+      <div class="calc-question">
+        <div class="calc-q-label">How many litres of water do you use daily for cooking/drinking?</div>
+        <input type="number" class="calc-number-input" id="inp-direct" placeholder="Enter litres" min="0" max="200">
+        <div class="calc-hint">// typical person uses 3-5L per day</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="goQ3()" style="flex:1;justify-content:center">← Back</button>
+        <button class="btn btn-primary" onclick="calculateResults()" style="flex:2;justify-content:center">Calculate My Footprint →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<footer><div class="footer-left">// slowtheflow.in</div><div class="footer-right">#SlowTheFlow</div></footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: RESULTS
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-results">
+<div class="calc-screen">
+  <div style="width:100%;max-width:640px">
+    <button class="back-btn" onclick="showScreen('calculator')">← Recalculate</button>
+  </div>
+  <div class="calc-card">
+    <div class="calc-header">
+      <div class="calc-tag">Your Water Footprint</div>
+      <h2 class="calc-title">Your Results</h2>
+      <p class="calc-sub">Here's your annual virtual water consumption</p>
+    </div>
+
+    <div class="result-total">
+      <div style="font-size:40px;margin-bottom:.5rem">💧</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:.5rem">Total Water Consumption</div>
+      <div class="result-total-num" id="result-total-num">0</div>
+      <div class="result-total-unit">litres per year</div>
+    </div>
+
+    <div class="result-comparison" id="result-people">
+      <div class="result-comp-icon">👥</div>
+      <div class="result-comp-text"><strong id="result-people-text">You're using water for 2 people</strong><br>That's 2× the average annual water consumption per person</div>
+    </div>
+
+    <div style="margin-top:1.5rem;margin-bottom:1rem">
+      <div style="font-size:13px;color:var(--text2);font-weight:500;margin-bottom:.75rem">Your breakdown:</div>
+      <div id="result-breakdown"></div>
+    </div>
+
+    <div style="background:rgba(232,160,50,.1);border:1px solid rgba(232,160,50,.25);border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;text-align:center">
+      <div style="font-size:22px;margin-bottom:.25rem">📈</div>
+      <div style="font-size:14px;font-weight:500;color:var(--amber);margin-bottom:.25rem">But Don't Worry!</div>
+      <div style="font-size:13px;color:var(--text2)">We have personalized suggestions to help you reduce your water footprint significantly.</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="showRecommendations()" style="width:100%;justify-content:center">See Ways to Save Water →</button>
+  </div>
+</div>
+<footer><div class="footer-left">// slowtheflow.in</div><div class="footer-right">#SlowTheFlow</div></footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: RECOMMENDATIONS
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-recommendations">
+<div class="calc-screen">
+  <div style="width:100%;max-width:640px">
+    <button class="back-btn" onclick="showScreen('results')">← Your Results</button>
+  </div>
+  <div class="calc-card">
+    <div class="calc-header">
+      <div class="calc-tag">Personalized Recommendations</div>
+      <h2 class="calc-title">Your Water-Saving Plan</h2>
+      <p class="calc-sub">Follow these tips to reduce your water footprint</p>
+    </div>
+
+    <div class="reco-hero">
+      <div class="reco-hero-label">You Could Save Up To</div>
+      <div class="reco-hero-num" id="reco-save-total">0L</div>
+      <div class="reco-hero-unit">of water per year!</div>
+    </div>
+
+    <div id="reco-list"></div>
+
+    <button class="btn btn-primary" onclick="showImpact()" style="width:100%;justify-content:center;margin-top:1rem">See the Impact You Can Make →</button>
+  </div>
+</div>
+<footer><div class="footer-left">// slowtheflow.in</div><div class="footer-right">#SlowTheFlow</div></footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: IMPACT
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-impact">
+<div class="calc-screen">
+  <div style="width:100%;max-width:640px">
+    <button class="back-btn" onclick="showScreen('recommendations')">← Recommendations</button>
+  </div>
+  <div class="calc-card">
+    <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.5rem;font-family:var(--mono)">🏆 Achievement Unlocked!</div>
+    <div class="impact-congrats">
+      <div class="impact-trophy">🌊</div>
+      <div class="impact-big-title">Congratulations!</div>
+      <div class="impact-big-sub">You're making a real difference for our planet</div>
+    </div>
+
+    <p style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:1.5rem">By following your personalized plan, you will:</p>
+
+    <div class="impact-stats-grid">
+      <div class="impact-stat-box primary">
+        <div class="impact-stat-num" id="imp-people">2</div>
+        <div class="impact-stat-label">Give water to <span id="imp-people2">2</span> people for a year!</div>
+      <div class="impact-stat-sub">based on WHO minimum 50L/person/day</div>
+      </div>
+      <div class="impact-stat-box">
+        <div class="impact-stat-num" id="imp-days1">755</div>
+        <div class="impact-stat-label">People's water for 1 day</div>
+        <div class="impact-stat-sub">at 50L/person/day (WHO)</div>
+      </div>
+      <div class="impact-stat-box">
+        <div class="impact-stat-num" id="imp-pools">0.04</div>
+        <div class="impact-stat-label">Olympic swimming pools</div>
+        <div class="impact-stat-sub">at 2.5M litres each</div>
+      </div>
+      <div class="impact-stat-box">
+        <div class="impact-stat-num" id="imp-homes">165</div>
+        <div class="impact-stat-label">Households' daily water</div>
+        <div class="impact-stat-sub">at 200L/household/day (India avg)</div>
+      </div>
+      <div class="impact-stat-box">
+        <div class="impact-stat-num" id="imp-days2">716</div>
+        <div class="impact-stat-label">Days timeline extended*</div>
+        <div class="impact-stat-sub">*if all 8B people made these changes · Source: UN WWAP</div>
+      </div>
+    </div>
+
+    <div class="impact-banner">
+      Together, we can #SlowTheFlow and #ExtendTheTime for future generations! 🌍
+    </div>
+
+    <!-- PER ITEM BREAKDOWN -->
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:.75rem;display:flex;align-items:center;gap:8px">
+        <span>📐</span> How we calculated your savings
+      </div>
+      <div id="impact-calc-breakdown" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-family:var(--mono);font-size:12px"></div>
+    </div>
+
+    <div class="impact-footer-text">
+      <strong>Imagine the Bigger Picture</strong><br>
+      If just a few simple changes can create this much impact, imagine what happens when millions act. Every day, hidden water goes into the consumer goods we buy, use, and discard. By scaling micro-changes across these categories, we can significantly extend our environmental timeline. Explore the staggering amount of water hidden in everyday items through data compiled by <a href="https://watercalculator.org" target="_blank" style="color:var(--water3)">watercalculator.org</a>.
+    </div>
+
+    <div class="impact-share-row">
+      <a href="https://wa.me/?text=I%20just%20calculated%20my%20water%20footprint%20with%20Slow%20the%20Flow!%20Join%20me%20in%20saving%20water%20%23SlowTheFlow%20slowtheflow.in" target="_blank" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center">📱 Share on WhatsApp</a>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('calculator')" style="flex:1;justify-content:center">🔄 Start Over</button>
+    </div>
+    <div style="text-align:center;margin-top:1.25rem">
+      <button onclick="showScreen('sources')" style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;letter-spacing:.06em;text-decoration:underline">// View Sources & Methodology →</button>
+    </div>
+  </div>
+</div>
+<footer><div class="footer-left">// slowtheflow.in</div><div class="footer-right">#SlowTheFlow</div></footer>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: SOURCES & METHODOLOGY
+══════════════════════════════════════════ -->
+<div class="screen" id="screen-sources">
+<div class="calc-screen" style="align-items:flex-start;max-width:800px;margin:0 auto">
+  <div style="width:100%;padding-top:0">
+    <button class="back-btn" onclick="history.go(-1) || showScreen('impact')">← Back</button>
+  </div>
+
+  <!-- HEADER -->
+  <div style="width:100%;margin-bottom:2rem">
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--water2);margin-bottom:.75rem">// Research Foundation</div>
+    <h1 style="font-family:var(--serif);font-size:clamp(32px,5vw,52px);color:var(--text);line-height:1.1;margin-bottom:.75rem">Sources &amp;<br><em style="color:var(--water3)">Methodology</em></h1>
+    <p style="font-size:15px;color:var(--text2);font-weight:300;line-height:1.7;max-width:600px">Every number in Slow the Flow is sourced from peer-reviewed research, UN agency reports, or internationally recognised water research institutions. This page documents each figure, its source, the year of publication, and how it was applied in the calculator.</p>
+  </div>
+
+  <!-- SECTION 1: WATER SCARCITY PROJECTIONS -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(232,160,50,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.25rem">Section 01</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">Water Scarcity Projections — The 2040 Countdown</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="background:var(--panel);border-radius:8px;padding:1rem;margin-bottom:1rem;font-family:var(--mono);font-size:12px">
+        <div style="color:var(--water3);margin-bottom:.5rem">CLAIM: "By 2040, if current consumption patterns continue, we may face severe water scarcity affecting billions."</div>
+        <div style="color:var(--text3)">Source 1: UNICEF — "Water Scarcity" (unicef.org/wash/water-scarcity)</div>
+        <div style="color:var(--text3)">Source 2: Common Dreams — "There Will Be No Water" (2014/07/30)</div>
+      </div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:.75rem">The UN and UNICEF project that by 2025, two-thirds of the world's population may face water stress conditions. The 2040 figure represents the projected point at which current freshwater extraction rates become unsustainable globally, based on WWAP (World Water Assessment Programme) modelling of agricultural, industrial, and domestic demand growth against aquifer depletion rates.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://www.unicef.org/wash/water-scarcity" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">unicef.org/wash/water-scarcity ↗</a>
+        <a href="https://www.commondreams.org/news/2014/07/30/there-will-be-no-water-2040-researchers-urge-global-energy-paradigm-shift" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">Common Dreams 2014 ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: WHO WATER STANDARDS -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(26,140,125,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--water2);margin-bottom:.25rem">Section 02</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">WHO Minimum Water Standard — 50L/Person/Day</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="background:var(--panel);border-radius:8px;padding:1rem;margin-bottom:1rem;font-family:var(--mono);font-size:12px">
+        <div style="color:var(--water3);margin-bottom:.5rem">FIGURE USED: 50 litres per person per day = 18,250 litres per person per year</div>
+        <div style="color:var(--text3)">Source: WHO — "Domestic Water Quantity, Service Level and Health" (Gleick, 1996; Howard &amp; Bartram, 2003)</div>
+        <div style="color:var(--text3)">Document: WHO/SDE/WSH/03.02 — Geneva, 2003</div>
+      </div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:.75rem">The World Health Organization defines the minimum water requirement for basic human needs as 50 litres per person per day. This covers: drinking water (2–5L), sanitation (20L), bathing (15L), and food preparation (10L). This is the figure used in Slow the Flow to convert water savings into "people supplied for a year."</p>
+      <div style="background:rgba(26,140,125,.06);border-left:3px solid var(--water);border-radius:0 6px 6px 0;padding:.85rem 1rem;margin-bottom:.85rem;font-size:13px;color:var(--text2)">
+        <strong style="color:var(--text)">How it's used in the calculator:</strong><br>
+        If you save 99,350L/year → 99,350 ÷ 18,250 = <strong style="color:var(--water3)">5.4 people's annual water supply</strong>
+      </div>
+      <a href="https://www.who.int/water_sanitation_health/diseases/WSH03.02.pdf" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">WHO/SDE/WSH/03.02 (2003) ↗</a>
+    </div>
+  </div>
+
+  <!-- SECTION 3: VIRTUAL WATER COEFFICIENTS -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(26,140,125,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--water2);margin-bottom:.25rem">Section 03</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">Virtual Water Coefficients — Product Footprints</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:1rem">The concept of "virtual water" was introduced by Professor John Allan (SOAS, University of London) in 1993. The Water Footprint Network, founded by Professor Arjen Hoekstra (University of Twente), maintains the global database of water footprint per product. All figures below are from their published research.</p>
+
+      <!-- TABLE -->
+      <div style="background:var(--panel);border-radius:8px;overflow:hidden;margin-bottom:1rem;font-size:13px">
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;background:rgba(26,140,125,.1);padding:.75rem 1rem;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--water2)">
+          <div>Product</div><div>Our Figure</div><div>Unit</div><div>Source</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">🍫 Chocolate / Cocoa</div>
+          <div style="font-family:var(--mono);color:var(--water3)">24,000L</div>
+          <div style="color:var(--text3);font-size:12px">per kg</div>
+          <div style="color:var(--text3);font-size:12px">Mekonnen &amp; Hoekstra (2010) — UNESCO-IHE</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">👕 Cotton clothing</div>
+          <div style="font-family:var(--mono);color:var(--water3)">2,700L</div>
+          <div style="color:var(--text3);font-size:12px">per piece</div>
+          <div style="color:var(--text3);font-size:12px">WFN — Cotton: 10,000L/kg × avg 270g garment</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">👖 Denim jeans</div>
+          <div style="font-family:var(--mono);color:var(--water3)">7,200L</div>
+          <div style="color:var(--text3);font-size:12px">per piece</div>
+          <div style="color:var(--text3);font-size:12px">Levi Strauss Life Cycle Assessment (2015)</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">🥩 Beef</div>
+          <div style="font-family:var(--mono);color:var(--water3)">15,400L</div>
+          <div style="color:var(--text3);font-size:12px">per kg</div>
+          <div style="color:var(--text3);font-size:12px">Mekonnen &amp; Hoekstra (2012) — Water Footprint of Farm Animals</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">☕ Coffee (1 cup)</div>
+          <div style="font-family:var(--mono);color:var(--water3)">140L</div>
+          <div style="color:var(--text3);font-size:12px">per cup</div>
+          <div style="color:var(--text3);font-size:12px">Hoekstra &amp; Chapagain (2007) — Water Footprint of Coffee</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">🍚 Rice</div>
+          <div style="font-family:var(--mono);color:var(--water3)">3,400L</div>
+          <div style="color:var(--text3);font-size:12px">per kg</div>
+          <div style="color:var(--text3);font-size:12px">Mekonnen &amp; Hoekstra (2011) — WFN Research Report 47</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border);align-items:center">
+          <div style="color:var(--text)">💧 Leaky tap</div>
+          <div style="font-family:var(--mono);color:var(--water3)">10,000L</div>
+          <div style="color:var(--text3);font-size:12px">per year</div>
+          <div style="color:var(--text3);font-size:12px">USGS Water Science School — Drip Calculator (2016)</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://waterfootprint.org/resources/Report-50-NationalWaterFootprints-Vol1.pdf" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">WFN National Footprints ↗</a>
+        <a href="https://waterfootprint.org/resources/Hoekstra_and_Chapagain_2007.pdf" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">Hoekstra &amp; Chapagain (2007) ↗</a>
+        <a href="https://watercalculator.org" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">watercalculator.org ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: INDIA HOUSEHOLD -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(26,140,125,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--water2);margin-bottom:.25rem">Section 04</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">India Household Daily Water Use — 200L/Household</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="background:var(--panel);border-radius:8px;padding:1rem;margin-bottom:1rem;font-family:var(--mono);font-size:12px">
+        <div style="color:var(--water3);margin-bottom:.5rem">FIGURE USED: 200 litres per household per day (urban India average)</div>
+        <div style="color:var(--text3)">Source 1: Bureau of Indian Standards IS:1172 — Code of Basic Requirements for Water Supply, Drainage and Sanitation</div>
+        <div style="color:var(--text3)">Source 2: Ministry of Jal Shakti, GoI — "Jal Jeevan Mission" benchmark: 55L/person/day rural, 135L/person/day urban</div>
+        <div style="color:var(--text3)">Source 3: CPHEEO Manual on Water Supply — 135L/person/day for cities &lt;1 lakh population</div>
+      </div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:.75rem">The 200L/household/day figure is derived from the Indian government's urban water supply standard of 135L/person/day × an average urban household size of 4.4 persons (Census 2011) ≈ 594L/day for large cities. We use 200L as a conservative baseline for a smaller household / semi-urban context. The Jal Jeevan Mission (2019) sets a minimum of 55 litres per person per day for rural households as the Functional Household Tap Connection (FHTC) standard.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://jaljeevanmission.gov.in" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">Jal Jeevan Mission ↗</a>
+        <a href="https://bis.gov.in" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">BIS IS:1172 ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: GLOBAL FRESHWATER / UN WWAP -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(26,140,125,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--water2);margin-bottom:.25rem">Section 05</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">Global Freshwater Use — UN WWAP / "Days Extended" Calculation</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="background:var(--panel);border-radius:8px;padding:1rem;margin-bottom:1rem;font-family:var(--mono);font-size:12px">
+        <div style="color:var(--water3);margin-bottom:.5rem">FIGURE USED: Global freshwater withdrawal ≈ 4,600 km³/year = 4.6 × 10¹⁵ litres/year</div>
+        <div style="color:var(--text3)">Source: UN World Water Assessment Programme (WWAP) — "The United Nations World Water Development Report 2019: Leaving No One Behind"</div>
+        <div style="color:var(--text3)">Published by: UNESCO, Paris, 2019 — ISBN 978-92-3-100309-7</div>
+        <div style="color:var(--text3)">Also: FAO AQUASTAT — Global water withdrawal data (2020 update)</div>
+      </div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:.85rem">According to UN WWAP (2019), global freshwater withdrawal is approximately 4,600 km³ per year and rising at roughly 1% per year due to population growth, economic development, and changing consumption patterns. Agriculture accounts for ~70%, industry ~20%, and domestic use ~10%.</p>
+
+      <!-- FORMULA BOX -->
+      <div style="background:var(--panel);border:1px solid var(--border2);border-radius:8px;padding:1.25rem;margin-bottom:1rem;font-family:var(--mono);font-size:12px;line-height:2">
+        <div style="color:var(--amber);margin-bottom:.5rem;font-size:11px;letter-spacing:.06em">// "DAYS EXTENDED" CALCULATION METHODOLOGY</div>
+        <div style="color:var(--text2)">Global annual freshwater use = <span style="color:var(--water3)">4,600 km³ = 4.6 × 10¹⁵ L/year</span></div>
+        <div style="color:var(--text2)">Daily global freshwater use = <span style="color:var(--water3)">4.6 × 10¹⁵ ÷ 365 = 1.26 × 10¹³ L/day</span></div>
+        <div style="color:var(--text2)">World population = <span style="color:var(--water3)">8 × 10⁹ people</span></div>
+        <div style="color:var(--text2)">If every person saves X litres/year:</div>
+        <div style="color:var(--text2)">Total global savings = <span style="color:var(--water3)">X × 8 × 10⁹ litres</span></div>
+        <div style="color:var(--text2)">Days extended = <span style="color:var(--water3)">(X × 8×10⁹) ÷ (4.6×10¹⁵ ÷ 365)</span></div>
+        <div style="color:var(--text3);font-size:11px;margin-top:.5rem">Note: This is a simplified model. Actual timeline depends on aquifer recharge rates, climate patterns, and consumption trajectories. The figure represents the proportional contribution of behavioural change to extending freshwater availability.</div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://www.unwater.org/publications/world-water-development-report-2019" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">UN WWDR 2019 ↗</a>
+        <a href="https://www.fao.org/aquastat/en/" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">FAO AQUASTAT ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: ARAL SEA -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(232,160,50,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.25rem">Section 06</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">Aral Sea Data</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="background:var(--panel);border-radius:8px;overflow:hidden;margin-bottom:1rem;font-size:13px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;background:rgba(232,160,50,.08);padding:.75rem 1rem;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--amber)">
+          <div>Year</div><div>Surface Area</div><div>Note</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text);font-family:var(--mono)">1960</div><div style="color:var(--water3);font-family:var(--mono)">68,000 km²</div><div style="color:var(--text2);font-size:12px">4th largest lake in the world</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text);font-family:var(--mono)">1987</div><div style="color:var(--amber);font-family:var(--mono)">27,000 km²</div><div style="color:var(--text2);font-size:12px">Split into North and South Aral Sea</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text);font-family:var(--mono)">2007</div><div style="color:var(--red);font-family:var(--mono)">10% remains</div><div style="color:var(--text2);font-size:12px">NASA satellite imagery confirmed</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text);font-family:var(--mono)">2014</div><div style="color:var(--red);font-family:var(--mono)">Eastern basin dry</div><div style="color:var(--text2);font-size:12px">First time in 600 years</div>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:.85rem">The Aral Sea data is documented by NASA Earth Observatory, UNEP (United Nations Environment Programme), and the UN Secretary-General's 2011 address. The Soviet Irrigation Programme beginning in the 1960s diverted the Amu Darya and Syr Darya rivers to irrigate cotton fields in Uzbekistan and Turkmenistan, resulting in the near-total disappearance of the lake within 50 years.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://earthobservatory.nasa.gov/world-of-change/AralSea" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">NASA Earth Observatory ↗</a>
+        <a href="https://www.unep.org/resources/report/dying-and-dead-seas" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">UNEP — Dying &amp; Dead Seas ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: BATHING -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:1.25rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(26,140,125,.06)">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--water2);margin-bottom:.25rem">Section 07</div>
+      <div style="font-size:17px;font-weight:600;color:var(--text)">Bathing Water Use — Shower vs Bucket</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem">
+      <div style="background:var(--panel);border-radius:8px;overflow:hidden;margin-bottom:1rem;font-size:13px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;background:rgba(26,140,125,.08);padding:.75rem 1rem;font-family:var(--mono);font-size:11px;color:var(--water2)">
+          <div>Method</div><div>Water Used</div><div>Source</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text)">🚿 Shower (5 min)</div><div style="color:var(--red);font-family:var(--mono)">~70L</div><div style="color:var(--text2);font-size:12px">CPCB India; avg flow rate 12–15 L/min</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text)">🪣 Bucket bath</div><div style="color:var(--water3);font-family:var(--mono)">~10L</div><div style="color:var(--text2);font-size:12px">Ministry of Jal Shakti; standard 10L bucket</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;padding:.75rem 1rem;border-top:1px solid var(--border)">
+          <div style="color:var(--text)">Annual saving</div><div style="color:var(--water3);font-family:var(--mono)">21,900L</div><div style="color:var(--text2);font-size:12px">60L/day × 365 days</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://cpcb.nic.in" target="_blank" style="font-family:var(--mono);font-size:11px;color:var(--water2);background:rgba(26,140,125,.08);padding:4px 12px;border-radius:20px;border:1px solid rgba(26,140,125,.2)">CPCB India ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL REFERENCE LIST -->
+  <div style="width:100%;background:var(--ink);border:1px solid var(--border);border-radius:12px;margin-bottom:2rem;overflow:hidden">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)">
+      <div style="font-size:17px;font-weight:600;color:var(--text)">📚 Complete Reference List</div>
+    </div>
+    <div style="padding:1.25rem 1.5rem;font-family:var(--mono);font-size:12px;line-height:2;color:var(--text2)">
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[1]</span> Hoekstra, A.Y. &amp; Chapagain, A.K. (2007). <em style="color:var(--text)">Water footprints of nations: Water use by people as a function of their consumption pattern.</em> Water Resources Management, 21(1), 35–48.
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[2]</span> Mekonnen, M.M. &amp; Hoekstra, A.Y. (2010). <em style="color:var(--text)">The green, blue and grey water footprint of crops and derived crop products.</em> UNESCO-IHE, Delft. Value of Water Research Report Series No. 47.
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[3]</span> Mekonnen, M.M. &amp; Hoekstra, A.Y. (2012). <em style="color:var(--text)">A global assessment of the water footprint of farm animal products.</em> Ecosystems, 15(3), 401–415.
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[4]</span> Howard, G. &amp; Bartram, J. (2003). <em style="color:var(--text)">Domestic Water Quantity, Service Level and Health.</em> WHO/SDE/WSH/03.02. World Health Organization, Geneva.
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[5]</span> UN WWAP (2019). <em style="color:var(--text)">The United Nations World Water Development Report 2019: Leaving No One Behind.</em> UNESCO, Paris. ISBN 978-92-3-100309-7.
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[6]</span> Levi Strauss &amp; Co. (2015). <em style="color:var(--text)">The Life Cycle of a Jean: Understanding the Environmental Impact of a Pair of Levi's® 501® Jeans.</em>
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[7]</span> NASA Earth Observatory. <em style="color:var(--text)">World of Change: Aral Sea.</em> earthobservatory.nasa.gov/world-of-change/AralSea
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[8]</span> UNICEF. <em style="color:var(--text)">Water Scarcity.</em> unicef.org/wash/water-scarcity
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[9]</span> Ministry of Jal Shakti, Government of India. <em style="color:var(--text)">Jal Jeevan Mission — Every Household Tap Water.</em> jaljeevanmission.gov.in
+      </div>
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)">
+        <span style="color:var(--water3)">[10]</span> FAO AQUASTAT. <em style="color:var(--text)">Global Water Information System.</em> fao.org/aquastat/en
+      </div>
+      <div>
+        <span style="color:var(--water3)">[11]</span> USGS Water Science School. <em style="color:var(--text)">Drip Calculator.</em> water.usgs.gov/edu/activity-drip.html
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div style="width:100%;background:rgba(26,140,125,.06);border:1px solid rgba(26,140,125,.2);border-radius:12px;padding:1.5rem;margin-bottom:2rem;text-align:center">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--water2);margin-bottom:.5rem">// Built by</div>
+    <div style="font-family:var(--serif);font-size:22px;color:var(--text);margin-bottom:.25rem">Aryan Aggarwal</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">Student Developer · Delhi Public School, Rohini · Delhi, India</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button onclick="showScreen('home')" class="btn btn-outline btn-sm">← Back to Site</button>
+      <button onclick="showScreen('calculator')" class="btn btn-primary btn-sm">Try the Calculator</button>
+    </div>
+  </div>
+
+</div>
+<footer><div class="footer-left">// slowtheflow.in · Sources &amp; Methodology</div><div class="footer-right">#SlowTheFlow</div></footer>
+</div>
+
+<script>
+// ── SCREEN NAVIGATION ──
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── COUNTDOWN ──
+function updateCountdown() {
+  const target = new Date('2040-01-01T00:00:00Z');
+  const now = new Date();
+  let diff = target - now;
+  if (diff <= 0) return;
+  const years = Math.floor(diff / (1000*60*60*24*365.25)); diff -= years*1000*60*60*24*365.25;
+  const months = Math.floor(diff / (1000*60*60*24*30.44)); diff -= months*1000*60*60*24*30.44;
+  const days = Math.floor(diff / (1000*60*60*24)); diff -= days*1000*60*60*24;
+  const hours = Math.floor(diff / (1000*60*60)); diff -= hours*1000*60*60;
+  const mins = Math.floor(diff / (1000*60)); diff -= mins*1000*60;
+  const secs = Math.floor(diff / 1000);
+  document.getElementById('cd-y').textContent = years;
+  document.getElementById('cd-mo').textContent = months;
+  document.getElementById('cd-d').textContent = days;
+  document.getElementById('cd-h').textContent = String(hours).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(mins).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(secs).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ── CALCULATOR STATE ──
+let bathType = '';
+let calcData = {};
+
+function selectBath(type) {
+  bathType = type;
+  document.getElementById('opt-shower').classList.toggle('selected', type === 'shower');
+  document.getElementById('opt-bucket').classList.toggle('selected', type === 'bucket');
+}
+
+function updateDots(step) {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (i < step) { dot.classList.add('done'); dot.classList.remove('active'); }
+    else if (i === step) { dot.classList.add('active'); dot.classList.remove('done'); }
+    else { dot.classList.remove('active','done'); }
+  }
+}
+
+function goQ1() {
+  document.getElementById('calc-q1').style.display='block';
+  document.getElementById('calc-q2').style.display='none';
+  updateDots(1);
+}
+function goQ2() {
+  if (!bathType) { alert('Please select how you bathe.'); return; }
+  const cotton = parseInt(document.getElementById('inp-cotton').value) || 0;
+  calcData.bathType = bathType;
+  calcData.cotton = cotton;
+  document.getElementById('calc-q1').style.display='none';
+  document.getElementById('calc-q2').style.display='block';
+  updateDots(2);
+}
+function goQ3() {
+  calcData.denim = parseInt(document.getElementById('inp-denim').value) || 0;
+  calcData.choco = parseInt(document.getElementById('inp-choco').value) || 0;
+  document.getElementById('calc-q2').style.display='none';
+  document.getElementById('calc-q3').style.display='block';
+  updateDots(3);
+}
+function goQ4() {
+  calcData.coffee = parseInt(document.getElementById('inp-coffee').value) || 0;
+  calcData.meat = parseInt(document.getElementById('inp-meat').value) || 0;
+  document.getElementById('calc-q3').style.display='none';
+  document.getElementById('calc-q4').style.display='block';
+  updateDots(4);
+}
+
+function calculateResults() {
+  calcData.rice = parseFloat(document.getElementById('inp-rice').value) || 0;
+  calcData.direct = parseInt(document.getElementById('inp-direct').value) || 4;
+
+  // Water calculations (litres/year)
+  const showerPerYear = calcData.bathType === 'shower' ? 70 * 365 : 10 * 365; // 70L shower vs 10L bucket
+  const cottonWater = calcData.cotton * 2700;
+  const denimWater = calcData.denim * 7200;
+  const chocoWater = calcData.choco * 240; // avg 100g bar = 240L
+  const coffeeWater = calcData.coffee * 52 * 140; // 140L per cup
+  const meatWater = calcData.meat * 52 * 500; // ~500L per serving
+  const riceWater = calcData.rice * 12 * 3400; // 3400L per kg rice
+  const directWater = calcData.direct * 365;
+
+  const total = showerPerYear + cottonWater + denimWater + chocoWater + coffeeWater + meatWater + riceWater + directWater;
+  calcData.total = total;
+  calcData.showerPerYear = showerPerYear;
+  calcData.cottonWater = cottonWater;
+  calcData.denimWater = denimWater;
+  calcData.chocoWater = chocoWater;
+  calcData.coffeeWater = coffeeWater;
+  calcData.meatWater = meatWater;
+  calcData.riceWater = riceWater;
+  calcData.directWater = directWater;
+
+  showResults();
+}
+
+function fmt(n) {
+  return Math.round(n).toLocaleString('en-IN');
+}
+
+function showResults() {
+  const total = calcData.total;
+  const avgPersonDirect = 18250; // WHO: 50L/day × 365 days
+  const multiple = (total / avgPersonDirect).toFixed(1);
+
+  document.getElementById('result-total-num').textContent = fmt(total);
+  document.getElementById('result-people-text').textContent =
+    `Equivalent to ${multiple} people's annual water supply`;
+  document.getElementById('result-people').querySelector('.result-comp-text').innerHTML =
+    `<strong>Equivalent to ${multiple} people's annual water supply</strong><br>Based on WHO minimum standard of 50 litres per person per day`;
+  // Breakdown
+  const breakdown = [
+    { label: 'Bathing', val: calcData.showerPerYear, icon: calcData.bathType === 'shower' ? '🚿' : '🪣' },
+    { label: 'Cotton clothing', val: calcData.cottonWater, icon: '👕' },
+    { label: 'Denim clothing', val: calcData.denimWater, icon: '👖' },
+    { label: 'Chocolate', val: calcData.chocoWater, icon: '🍫' },
+    { label: 'Coffee/Tea', val: calcData.coffeeWater, icon: '☕' },
+    { label: 'Meat', val: calcData.meatWater, icon: '🥩' },
+    { label: 'Rice', val: calcData.riceWater, icon: '🍚' },
+    { label: 'Direct use', val: calcData.directWater, icon: '💧' },
+  ].filter(x => x.val > 0).sort((a,b) => b.val - a.val);
+
+  let bhtml = '';
+  breakdown.forEach(item => {
+    const pct = Math.round((item.val / calcData.total) * 100);
+    bhtml += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:16px">${item.icon}</span>
+      <span style="flex:1;font-size:13px;color:var(--text2)">${item.label}</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--water3)">${fmt(item.val)}L</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">${pct}%</span>
+    </div>
+    <div style="height:4px;background:var(--border);border-radius:2px;margin-bottom:10px">
+      <div style="height:4px;background:var(--water);border-radius:2px;width:${pct}%;transition:width .5s"></div>
+    </div>`;
+  });
+  document.getElementById('result-breakdown').innerHTML = bhtml;
+
+  // Calculate savings & recommendations
+  const recos = [];
+
+  if (calcData.bathType === 'shower') {
+    const save = (70 - 10) * 365;
+    recos.push({ icon:'🚿', iconClass:'blue', title:'Switch to 10L bucket bathing', desc:'Use a 10 litre bucket to bath daily instead of shower.', save });
+  }
+  if (calcData.cotton > 4) {
+    const save = (calcData.cotton - 4) * 2700;
+    recos.push({ icon:'👕', iconClass:'green', title:'Reduce cotton clothing purchases', desc:"Try to buy only 4 cotton clothes yearly. Buy from companies using 'Better Cotton License'.", save });
+  }
+  if (calcData.denim > 2) {
+    const save = (calcData.denim - 2) * 7200;
+    recos.push({ icon:'👖', iconClass:'teal', title:'Buy less denim', desc:'Try to buy only 2 denim jeans yearly. Consider second-hand options.', save });
+  }
+  if (calcData.choco > 10) {
+    const save = (calcData.choco - 10) * 240;
+    recos.push({ icon:'🍫', iconClass:'blue', title:'Reduce chocolate consumption', desc:'Limit to 10 chocolate bars per year. Opt for fair-trade, sustainably-sourced options.', save });
+  }
+  if (calcData.meat > 2) {
+    const save = (calcData.meat - 2) * 52 * 500;
+    recos.push({ icon:'🥩', iconClass:'green', title:'Reduce meat consumption', desc:'Try limiting beef/mutton to 2 servings per week. Replace with plant-based proteins.', save });
+  }
+  if (calcData.coffee > 7) {
+    const save = (calcData.coffee - 7) * 52 * 140;
+    recos.push({ icon:'☕', iconClass:'teal', title:'Reduce coffee/tea consumption', desc:'Try to limit to 1 cup per day. Switch to local herbal teas when possible.', save });
+  }
+  // Always add a general one
+  recos.push({ icon:'💧', iconClass:'blue', title:'Fix leaky taps immediately', desc:'A leaky faucet dripping once per second wastes up to 10,000 litres per year.', save: 10000 });
+
+  calcData.recos = recos;
+  calcData.totalSave = recos.reduce((a,b) => a + b.save, 0);
+
+  showScreen('results');
+}
+
+function showRecommendations() {
+  document.getElementById('reco-save-total').textContent = fmt(calcData.totalSave) + 'L';
+  let html = '';
+  calcData.recos.forEach(r => {
+    html += `<div class="reco-item">
+      <div class="reco-icon ${r.iconClass}">${r.icon}</div>
+      <div class="reco-text">
+        <div class="reco-title">${r.title}</div>
+        <div class="reco-desc">${r.desc}</div>
+        <div class="reco-save">💧 Save ${fmt(r.save)}L per year</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('reco-list').innerHTML = html;
+  showScreen('recommendations');
+}
+
+function showImpact() {
+  const saved = calcData.totalSave;
+  // Water Footprint Network: India avg virtual water footprint = ~1,000 m³/person/year = 1,000,000L
+  // Direct household water (WHO): ~50L/day minimum = 18,250L/year
+  // We compare against DIRECT household water (18,250L) since our calculator measures
+  // consumption-related virtual water + direct use — not full national footprint
+  const perPersonDirect = 18250; // WHO: 50L/day × 365
+  const people = Math.round(saved / perPersonDirect * 10) / 10;
+  // 1 person's daily water need = 50L (WHO minimum)
+  const days1 = Math.round(saved / 50);
+  // Olympic swimming pool = 2,500,000L
+  const pools = Math.round(saved / 2500000 * 1000) / 1000;
+  // Average Indian household daily use = ~200L/day (4 people × 50L)
+  const homes = Math.round(saved / 200);
+  // Global water crisis extension: if 8 billion people save `saved` litres,
+  // total saved = saved × 8e9 litres. Annual global freshwater use = ~4,600 km³ = 4.6e15L
+  // Days extended = (saved × 8e9) / (4.6e15 / 365)
+  const daysExt = Math.round(saved * 8e9 / (4.6e15 / 365) * 100) / 100;
+
+  document.getElementById('imp-people').textContent = people;
+  document.getElementById('imp-people2').textContent = people;
+  document.getElementById('imp-days1').textContent = fmt(days1);
+  document.getElementById('imp-pools').textContent = pools;
+  document.getElementById('imp-homes').textContent = fmt(homes);
+  document.getElementById('imp-days2').textContent = daysExt;
+
+  // Per-item calculation breakdown
+  const calcRows = [
+    {
+      icon:'🚿', label:'Bathing',
+      formula: calcData.bathType === 'shower'
+        ? `Shower (70L/day) → Bucket (10L/day) = Save 60L/day × 365 days`
+        : `Already using bucket (10L/day) — great habit!`,
+      save: calcData.bathType === 'shower' ? 60*365 : 0,
+      source:'WHO Household Water Use Guidelines'
+    },
+    {
+      icon:'👕', label:'Cotton clothing',
+      formula: calcData.cotton > 4
+        ? `${calcData.cotton} items/yr → 4 items/yr = ${calcData.cotton-4} items saved × 2,700L/item`
+        : `${calcData.cotton} items/yr — within sustainable range (≤4)`,
+      save: calcData.cotton > 4 ? (calcData.cotton-4)*2700 : 0,
+      source:'Water Footprint Network — Cotton production avg 10,000L/kg'
+    },
+    {
+      icon:'👖', label:'Denim / Jeans',
+      formula: calcData.denim > 2
+        ? `${calcData.denim} pieces/yr → 2 pieces/yr = ${calcData.denim-2} saved × 7,200L/piece`
+        : `${calcData.denim} pieces/yr — within sustainable range (≤2)`,
+      save: calcData.denim > 2 ? (calcData.denim-2)*7200 : 0,
+      source:'Levi Strauss & Co Water < Less initiative — 7,200L per pair'
+    },
+    {
+      icon:'🍫', label:'Chocolate',
+      formula: calcData.choco > 10
+        ? `${calcData.choco} bars/yr → 10 bars/yr = ${calcData.choco-10} saved × 240L/bar`
+        : `${calcData.choco} bars/yr — within sustainable range (≤10)`,
+      save: calcData.choco > 10 ? (calcData.choco-10)*240 : 0,
+      source:'UNESCO-IHE — Cocoa: 24,000L/kg × avg 100g bar = 2,400L/kg'
+    },
+    {
+      icon:'🥩', label:'Meat consumption',
+      formula: calcData.meat > 2
+        ? `${calcData.meat} servings/wk → 2/wk = ${calcData.meat-2} saved × 500L × 52 wks`
+        : `${calcData.meat} servings/wk — within sustainable range (≤2)`,
+      save: calcData.meat > 2 ? (calcData.meat-2)*52*500 : 0,
+      source:'FAO — Beef: 15,400L/kg, ~500L per avg serving'
+    },
+    {
+      icon:'☕', label:'Coffee / Tea',
+      formula: calcData.coffee > 7
+        ? `${calcData.coffee} cups/wk → 7/wk = ${calcData.coffee-7} saved × 140L × 52 wks`
+        : `${calcData.coffee} cups/wk — within sustainable range (≤7)`,
+      save: calcData.coffee > 7 ? (calcData.coffee-7)*52*140 : 0,
+      source:'Water Footprint Network — Coffee: 140L per 125ml cup'
+    },
+    {
+      icon:'💧', label:'Fixing leaky taps',
+      formula:`1 drip/second wastes ~27L/day × 365 days = 10,000L/yr`,
+      save: 10000,
+      source:'USGS Water Science School — drip calculator'
+    }
+  ];
+
+  let bhtml = '';
+  calcRows.forEach((row, i) => {
+    const hasSaving = row.save > 0;
+    bhtml += `<div style="padding:12px 16px;border-bottom:1px solid var(--border);${i===calcRows.length-1?'border-bottom:none':''}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:15px">${row.icon}</span>
+        <span style="color:var(--text);font-size:12px;font-weight:500;font-family:var(--sans)">${row.label}</span>
+        ${hasSaving ? `<span style="margin-left:auto;color:var(--water3);font-size:11px">Save ${fmt(row.save)}L/yr</span>` : `<span style="margin-left:auto;color:var(--text3);font-size:11px">No change needed</span>`}
+      </div>
+      <div style="color:var(--text2);font-size:11px;line-height:1.5;padding-left:23px">${row.formula}</div>
+      <div style="color:var(--text3);font-size:10px;padding-left:23px;margin-top:3px">Source: ${row.source}</div>
+    </div>`;
+  });
+
+  // Add totals row
+  bhtml += `<div style="padding:12px 16px;background:rgba(26,140,125,.08);border-top:1px solid rgba(26,140,125,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="color:var(--water2);font-size:12px;font-family:var(--sans);font-weight:600">Total Savings</span>
+      <span style="color:var(--water3);font-size:13px;font-weight:500">${fmt(saved)}L / year</span>
+    </div>
+    <div style="color:var(--text3);font-size:10px;margin-top:3px">
+      = ${people} people's annual water supply (WHO: 50L/day) &nbsp;·&nbsp; ${fmt(days1)} people's daily water need
+    </div>
+    <div style="color:var(--text3);font-size:10px;margin-top:2px">
+      Sources: Water Footprint Network · WHO · FAO · UN WWAP · UNESCO-IHE
+    </div>
+  </div>`;
+
+  document.getElementById('impact-calc-breakdown').innerHTML = bhtml;
+  showScreen('impact');
+}
+
+// Calculator flow wired correctly via onclick attributes above
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); }});
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.borderBottomColor = window.scrollY > 50 ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.07)';
+});
+</script>
+</body>
+</html>
